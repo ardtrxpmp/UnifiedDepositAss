@@ -5,6 +5,17 @@
 The Unified Deposit project is a multi-chain USDC auto-forwarding system that enables seamless USDC deposits across multiple blockchain networks with automatic forwarding to a specified recipient address. The system is designed to deploy identical smart contracts at the same deterministic address across different chains using CREATE2, ensuring a unified user experience regardless of the blockchain network.
 
 
+### Contracts on all 3 chains
+```https://sepolia.arbiscan.io/address/0xe00e46e0061bF52c503ef7189fb9499ab54e31c8 ```
+
+```https://sepolia-optimism.etherscan.io/address/0xe00e46e0061bF52c503ef7189fb9499ab54e31c8```
+
+```https://sepolia.basescan.org/address/0xe00e46e0061bF52c503ef7189fb9499ab54e31c8```
+
+### Example of DepositUSDC() call and automated Sent to Recepeint 
+#### Deposit Txn```https://sepolia.arbiscan.io/tx/0xbf1d5b2ca5ca0996ac192e824a5e6b1ec0def7a123d731d4575c186b3d9822a3```
+#### Automated Forwarded Txn(through Service response) ```https://sepolia.arbiscan.io/tx/0xbeecb416e6815c7279180ab0b32c03bb57d0b632ece9dd313899dc11a19adf32```
+
 ## Contract Functions
 
 ### Main Functions
@@ -62,7 +73,7 @@ Deploy the USDCAutoForwarder contract on each supported network:
 **Arbitrum Sepolia:**
 
 ```bash
-forge script script/DeployCreate2.s.sol:MultiChainDeploymentScript --rpc-url "YOUR_RPC_URL_ARBITRUM" --broadcast --private-key "PRIVATE_KEY"
+forge script script/DeployCreate2.s.sol:MultiChainDeploymentScript --rpc-url "https://rpc.ankr.com/arbitrum_sepolia/150aa8fab13e61e50ba49ac1cd0c06e26ae190e4c907691044886fdda314bfb6" --broadcast
 ```
 
 **Optimism Sepolia:**
@@ -92,6 +103,3 @@ Send USDC to the deployed contract for testing:
 ```bash
 forge script script/DepositUSDC.s.sol:DepositUSDCScript --rpc-url "RPC_URL_RESPECTIVE_CHAIN" --private-key "PRIVATE_KEY" --broadcast
 ```
-
-
-
