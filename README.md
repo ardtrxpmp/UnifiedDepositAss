@@ -1,4 +1,4 @@
-# Unified Deposit - Multi-Chain USDC Auto Forwarder
+# USDC Auto Forwarder
 
 ## Project Description
 
