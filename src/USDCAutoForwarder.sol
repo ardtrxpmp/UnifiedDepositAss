@@ -7,51 +7,42 @@ import "openzeppelin-contracts/contracts/access/Ownable.sol";
 
 /**
  * @title USDCAutoForwarder
- * @dev A contract that automatically forwards USDC deposits to a specified recipient
+ * @dev A contract that receives USDC deposits and forwards it to a specified recipient on initialed backend trigger.
  * @notice This contract is designed to be deployed at the same address across multiple chains
  */
 contract USDCAutoForwarder is ReentrancyGuard, Ownable {
-    // USDC token interface
-    IERC20 public immutable usdc;
-    
-    // Recipient address for forwarded USDC
+    IERC20 public usdc;
     address public recipient;
-    
+    bool public usdcSetStatus;
+
     // Events
-    event USDCDeposited(
-        address indexed sender,
-        uint256 amount,
-        uint256 timestamp
-    );
+    event USDCDeposited(address indexed sender, uint256 amount, uint256 timestamp);
 
-    event USDCForwarded(
-        address indexed recipient,
-        uint256 amount,
-        uint256 timestamp
-    );
+    event USDCForwarded(address indexed recipient, uint256 amount, uint256 timestamp);
 
-    event RecipientUpdated(
-        address indexed oldRecipient,
-        address indexed newRecipient
-    );
+    event RecipientUpdated(address indexed oldRecipient, address indexed newRecipient);
 
     // Custom errors
     error ZeroAmount();
     error ZeroAddress();
     error TransferFailed();
     error InsufficientBalance();
+    error USDCAlreadySet();
 
     /**
      * @dev Constructor
-     * @param _usdcToken Address of the USDC token contract
      * @param _recipient Address that will receive forwarded USDC
      */
-    constructor(address _usdcToken, address _recipient) Ownable(msg.sender){
-        if (_usdcToken == address(0)) revert ZeroAddress();
+    constructor( address _recipient) Ownable(msg.sender) {
         if (_recipient == address(0)) revert ZeroAddress();
-        
-        usdc = IERC20(_usdcToken);
+
         recipient = _recipient;
+    }
+
+    function setUSDCAddress(address _usdcToken) external  {
+        if (_usdcToken == address(0)) revert ZeroAddress();
+        // if (!usdcSetStatus) revert USDCAlreadySet();
+        usdc = IERC20(_usdcToken);
     }
 
     /**
@@ -60,10 +51,10 @@ contract USDCAutoForwarder is ReentrancyGuard, Ownable {
      */
     function depositUSDC(uint256 amount) external nonReentrant {
         if (amount == 0) revert ZeroAmount();
-        
+
         // Transfer USDC from sender to this contract
         require(usdc.transferFrom(msg.sender, address(this), amount), "Transfer failed");
-        
+
         emit USDCDeposited(msg.sender, amount, block.timestamp);
     }
 
@@ -73,10 +64,10 @@ contract USDCAutoForwarder is ReentrancyGuard, Ownable {
      */
     function forwardUSDC(uint256 amount) external nonReentrant {
         if (amount == 0) revert ZeroAmount();
-        
+
         uint256 balance = usdc.balanceOf(address(this));
         if (balance < amount) revert InsufficientBalance();
-        
+
         _forwardUSDC(amount);
     }
 
@@ -95,10 +86,10 @@ contract USDCAutoForwarder is ReentrancyGuard, Ownable {
      */
     function updateRecipient(address newRecipient) external onlyOwner {
         if (newRecipient == address(0)) revert ZeroAddress();
-        
+
         address oldRecipient = recipient;
         recipient = newRecipient;
-        
+
         emit RecipientUpdated(oldRecipient, newRecipient);
     }
 
